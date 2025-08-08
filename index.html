@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!-- iOS-specific meta tags -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="A330Neo Standard Fuel Distribution Calculator" />
+<link rel="apple-touch-icon" href="icon.png" />
+
+<!-- Link to manifest file -->
+<link rel="manifest" href="manifest.json" />
+
+
+    <meta charset="UTF-8">
+    <title>A330Neo Standard Fuel Distribution Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #f0f0f0;
+            --box-bg: #5e5e5e;
+            --highlight: #00cc77;
+        }
+
+        body.day-mode {
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --box-bg: #f0f8ff;
+            --highlight: #00cc77;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h2, h3 {
+            text-align: center;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid var(--highlight);
+            background-color: var(--box-bg);
+            color: var(--text-color);
+        }
+
+        button {
+            cursor: pointer;
+            background-color: var(--highlight);
+            color: #fff;
+            border: none;
+        }
+
+        #caseLabel { 
+            color: #ff8800;
+            text-align: center;
+        }
+
+        .tank-layout {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .tank-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tank {
+            border: 2px solid var(--highlight);
+            border-radius: 8px;
+            padding: 10px;
+            width: 120px;
+            text-align: center;
+            background-color: var(--box-bg);
+            margin-bottom: 10px;
+        }
+
+        .tank h4 {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .tank p {
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .total-box {
+            margin-top: 20px;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            border: 3px solid var(--highlight);
+            border-radius: 10px;
+            background-color: var(--box-bg);
+            width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .mode-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 600px) {
+            .tank {
+                width: 100px;
+                font-size: 12px;
+            }
+
+            .total-box {
+                width: 90%;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h2>A330Neo Standard Fuel Distribution Calculator</h2>
+    <form id="fuelForm">
+        <label for="pfq">Fuel Requirement (PFQ in tons):</label>
+        <input type="number" id="pfq" name="pfq" step="0.1" required>
+        </BR></BR>
+        <label for="density">Specific Density (d):</label>
+        <input type="number" id="density" name="density" value="0.785" step="0.001" required>
+
+        <button type="button" onclick="calculateDistribution()">Calculate</button>
+    </form>
+
+    <h3>Fuel Breakdown:</h3>
+    <p id="caseLabel"><strong>Awaiting input...</strong></p>
+
+    <div class="tank-layout">
+        <div class="tank"><h4>Outer LH Tank</h4><p id="outerLH">0 kg</p></div>
+        <div class="tank"><h4>Inner LH Tank</h4><p id="innerLH">0 kg</p></div>
+
+        <div class="tank-column">
+            <div class="tank"><h4>Center Tank</h4><p id="center">0 kg</p></div>
+            <div class="tank"><h4>Trim Tank</h4><p id="trim">0 kg</p></div>
+        </div>
+
+        <div class="tank"><h4>Inner RH Tank</h4><p id="innerRH">0 kg</p></div>
+        <div class="tank"><h4>Outer RH Tank</h4><p id="outerRH">0 kg</p></div>
+    </div>
+
+    <div id="totalFuelBox" class="total-box">Fuel on Board (FOB): 0 kg</div>
+
+    <div class="mode-toggle">
+        <button onclick="toggleMode()">Toggle Day/Night Mode</button>
+    </div>
+
+    <script>
+        function roundToNearestTen(value) {
+            return Math.round(value / 10) * 10;
+        }
+
+        function roundToNearestHundred(value) {
+            return Math.round(value / 100) * 100;
+        }
+
+        function calculateDistribution() {
+            const pfqTons = parseFloat(document.getElementById('pfq').value);
+            const density = parseFloat(document.getElementById('density').value);
+            const pfq = pfqTons * 1000;
+            let tanks = {
+                outerLH: 0,
+                innerLH: 0,
+                center: 0,
+                innerRH: 0,
+                outerRH: 0,
+                trim: 0
+            };
+            let caseLabel = '';
+
+            const caseBThreshold = roundToNearestHundred(9000 + (7300 * density));
+            const caseEThreshold = roundToNearestHundred(3600 + (91300 * density));
+
+            if (pfq >= 0 && pfq <= 9000) {
+                caseLabel = 'Case A as per Weight and Balance Manual';
+                tanks.innerLH = pfq * 0.5;
+                tanks.innerRH = pfq * 0.5;
+            } else if (pfq >= 9100 && pfq <= caseBThreshold) {
+                caseLabel = 'Case B as per Weight and Balance Manual';
+                const outer = (pfq - 9000) * 0.5;
+                tanks.outerLH = outer;
+                tanks.innerLH = 4500;
+                tanks.innerRH = 4500;
+                tanks.outerRH = outer;
+            } else if (pfq >= (caseBThreshold + 100) && pfq <= 23900) {
+                caseLabel = 'Case C as per Weight and Balance Manual';
+                const outer = 3650 * density;
+                const inner = (pfq - (7300 * density)) * 0.5;
+                tanks.outerLH = outer;
+                tanks.innerLH = inner;
+                tanks.innerRH = inner;
+                tanks.outerRH = outer;
+            } else if (pfq >= 24000 && pfq <= 27500) {
+                caseLabel = 'Case D as per Weight and Balance Manual';
+                const inner = (23900 - (7300 * density)) * 0.5;
+                tanks.outerLH = 3650 * density;
+                tanks.innerLH = inner;
+                tanks.innerRH = inner;
+                tanks.outerRH = 3650 * density;
+                tanks.trim = pfq - 23900;
+            } else if (pfq >= 27600 && pfq <= caseEThreshold) {
+                caseLabel = 'Case E as per Weight and Balance Manual';
+                const inner = (pfq - (7300 * density) - 3600) * 0.5;
+                tanks.outerLH = 3650 * density;
+                tanks.innerLH = inner;
+                tanks.innerRH = inner;
+                tanks.outerRH = 3650 * density;
+                tanks.trim = 3600;
+            } else if (pfq >= (caseEThreshold + 100) && pfq <= 139090 * density) {
+                caseLabel = 'Case F as per Weight and Balance Manual';
+                const alltanks1 = pfq - 3600 - (91300 * density);
+                const alltanks2 = (139090 * density) - 3600 - (91300 * density);
+                tanks.outerLH = 3650 * density;
+                tanks.center = alltanks1 * (41560 * density) / alltanks2;
+                tanks.innerLH = 42000 * density;
+                tanks.innerRH = 42000 * density;
+                tanks.outerRH = 3650 * density;
+                tanks.trim = 3600 + (alltanks1 * ((6230 * density) - 3600) / alltanks2);
+            } else {
+                document.getElementById('caseLabel').innerHTML = `<strong>PFQ out of supported range for distribution logic.</strong>`;
+                return;
+            }
+
+            document.getElementById('caseLabel').innerHTML = `<strong>${caseLabel}</strong>`;
+            document.getElementById('outerLH').textContent = `${roundToNearestTen(tanks.outerLH)} kg`;
+            document.getElementById('innerLH').textContent = `${roundToNearestTen(tanks.innerLH)} kg`;
+            document.getElementById('center').textContent = `${roundToNearestTen(tanks.center)} kg`;
+            document.getElementById('trim').textContent = `${roundToNearestTen(tanks.trim)} kg`;
+            document.getElementById('innerRH').textContent = `${roundToNearestTen(tanks.innerRH)} kg`;
+            document.getElementById('outerRH').textContent = `${roundToNearestTen(tanks.outerRH)} kg`;
+
+            const totalFuel = roundToNearestTen(
+                tanks.outerLH + tanks.innerLH + tanks.center +
+                tanks.innerRH + tanks.outerRH + tanks.trim
+            );
+            document.getElementById('totalFuelBox').textContent = `Fuel on Board (FOB): ${totalFuel} kg`;
+        }
+
+        function toggleMode() {
+            document.body.classList.toggle('day-mode');
+        }
+    </script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('Service Worker registered'))
+      .catch(error => console.error('Service Worker registration failed:', error));
+  }
+</script>
+
+</body>
+</html>
