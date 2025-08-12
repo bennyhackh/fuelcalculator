@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 
@@ -11,11 +12,10 @@
 <!-- Link to manifest file -->
 <link rel="manifest" href="manifest.json" />
 
-
-    <meta charset="UTF-8">
-    <title>A330Neo Standard Fuel Distribution Calculator</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
+<meta charset="utf-8"/>
+<title>A330Neo Standard Fuel Distribution Calculator</title>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<style>
         :root {
             --bg-color: #121212;
             --text-color: #f0f0f0;
@@ -49,12 +49,11 @@
         }
 
         input, button {
-            width: 100%;
             padding: 10px;
             margin-top: 10px;
             font-size: 16px;
             border-radius: 5px;
-            border: 1px solid var(--highlight);
+            border: 2px solid var(--highlight);
             background-color: var(--box-bg);
             color: var(--text-color);
         }
@@ -68,7 +67,7 @@
 
         #caseLabel { 
             color: #ff8800;
-            text-align: center;
+            text-align: left;
         }
 
         .tank-layout {
@@ -90,7 +89,7 @@
             border: 2px solid var(--highlight);
             border-radius: 8px;
             padding: 10px;
-            width: 120px;
+            width: 100px;
             text-align: center;
             background-color: var(--box-bg);
             margin-bottom: 10px;
@@ -121,7 +120,7 @@
         }
 
         .mode-toggle {
-            text-align: center;
+            text-align: right;
             margin-top: 20px;
         }
 
@@ -139,40 +138,38 @@
     </style>
 </head>
 <body>
-    <h2>A330Neo Standard Fuel Distribution Calculator</h2>
-    <form id="fuelForm">
-        <label for="pfq">Fuel Requirement (PFQ in tons):</label>
-        <input type="number" id="pfq" name="pfq" step="0.1" required>
-        </BR></BR>
-        <label for="density">Specific Density (d):</label>
-        <input type="number" id="density" name="density" value="0.785" step="0.001" required>
+<h2>A330Neo Standard Fuel Distribution Calculator</h2>
 
-        <button type="button" onclick="calculateDistribution()">Calculate</button>
-    </form>
+<form id="fuelForm">
+<table cellpadding=0 cellspacing=0 align=center border=0>
+<tr>
+<td width=140px>
+<label for="pfq">FOB (In Tons):</label>
+<input id="pfq" name="pfq" required="" step="0.1" type="number" value="0.0" style="width: 100px; font-size: 30px;" oninput="limitDecimals(this, 1)"/>
+</td>
+<td width=120px>
+<button onclick="calculateDistribution()" type="button">Compute</button>
+</td>
+<td align=right>
+<label for="density">Specific Gravity:</label>
+<input id="density" name="density" required="" step="0.001" type="number" value="0.785" style="width: 60px; font-size: 16px;" oninput="limitDecimals(this, 3)"/>
+</td>
+</tr>
+<tr>
+<td align=left height=70px>
+<h3>Fuel Status:</h3>
+</td>
+<td colspan=2 align=left style="vertical-align: middle;">
+<p id="caseLabel"><strong>Awaiting input...</strong></p>
+</td>
+</tr>
+</table>
 
-    <h3>Fuel Breakdown:</h3>
-    <p id="caseLabel"><strong>Awaiting input...</strong></p>
+</form>
 
-    <div class="tank-layout">
-        <div class="tank"><h4>Outer LH Tank</h4><p id="outerLH">0 kg</p></div>
-        <div class="tank"><h4>Inner LH Tank</h4><p id="innerLH">0 kg</p></div>
 
-        <div class="tank-column">
-            <div class="tank"><h4>Center Tank</h4><p id="center">0 kg</p></div>
-            <div class="tank"><h4>Trim Tank</h4><p id="trim">0 kg</p></div>
-        </div>
 
-        <div class="tank"><h4>Inner RH Tank</h4><p id="innerRH">0 kg</p></div>
-        <div class="tank"><h4>Outer RH Tank</h4><p id="outerRH">0 kg</p></div>
-    </div>
-
-    <div id="totalFuelBox" class="total-box">Fuel on Board (FOB): 0 kg</div>
-
-    <div class="mode-toggle">
-        <button onclick="toggleMode()">Toggle Day/Night Mode</button>
-    </div>
-
-    <script>
+<script>
         function roundToNearestTen(value) {
             return Math.round(value / 10) * 10;
         }
@@ -180,7 +177,20 @@
         function roundToNearestHundred(value) {
             return Math.round(value / 100) * 100;
         }
+function limitDecimals(el, count) {
+  const value = el.value;
+  
+  // Allow empty input or just a minus sign
+  if (value === '' || value === '-') return;
 
+  // Split on decimal point
+  const parts = value.split('.');
+  
+  // If there's a decimal part, trim it
+  if (parts.length === 2 && parts[1].length > count) {
+    el.value = parts[0] + '.' + parts[1].slice(0, count);
+  }
+}
         function calculateDistribution() {
             const pfqTons = parseFloat(document.getElementById('pfq').value);
             const density = parseFloat(document.getElementById('density').value);
@@ -244,7 +254,7 @@
                 tanks.outerRH = 3650 * density;
                 tanks.trim = 3600 + (alltanks1 * ((6230 * density) - 3600) / alltanks2);
             } else {
-                document.getElementById('caseLabel').innerHTML = `<strong>PFQ out of supported range for distribution logic.</strong>`;
+                document.getElementById('caseLabel').innerHTML = `<strong>FOB out of supported range for distribution logic.</strong>`;
                 return;
             }
 
@@ -264,9 +274,44 @@
         }
 
         function toggleMode() {
+            const btn = document.getElementById('modeToggle');
+            const isDay = btn.textContent === '🌞 Mode';
+            btn.textContent = isDay ? '🌜 Mode' : '🌞 Mode';
             document.body.classList.toggle('day-mode');
         }
     </script>
+<table border=0 align=center cellpadding=0 cellspacing=0 id="aircraft-container" style="position: relative; width: 100%; max-width: 650px; margin: auto; background: url('A330N.png') no-repeat center center; background-size: contain; height: 600px;">
+<tr>
+<td align=right colspan=2 style="vertical-align: top;">
+<div class="mode-toggle">
+<button id="modeToggle" onclick="toggleMode()" type=button style="font-size: 28px">🌞 Mode</button>
+</div>
+</td>
+</tr>
+<tr>
+<td align=center colspan=2 style="vertical-align: bottom;">
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; align-items: flex-end;">
+<div class="tank" style=""><h4>Inner LH Tank</h4><p id="innerLH">0 kg</p></div>
+<div class="tank" style="transform: translateY(-30px);"><h4>Center Tank</h4><p id="center">0 kg</p></div>
+<div class="tank" style=""><h4>Inner RH Tank</h4><p id="innerRH">0 kg</p></div>
+</div>
+</td>
+</tr>
+<tr>
+<td align=left height=100px style="vertical-align: top;">
+<div class="tank" style=""><h4>Outer LH Tank</h4><p id="outerLH">0 kg</p></div>
+</td>
+<td align=right style="vertical-align: top;">
+<div class="tank" style=""><h4>Outer RH Tank</h4><p id="outerRH">0 kg</p></div>
+</td>
+</tr>
+<tr>
+<td align=center colspan=2 height=150px style="vertical-align: bottom;">
+<div class="tank" style=""><h4>Trim Tank</h4><p id="trim">0 kg</p></div>
+</td>
+</tr>
+</table>
+
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js')
