@@ -114,7 +114,7 @@
             border: 3px solid var(--highlight);
             border-radius: 10px;
             background-color: var(--box-bg);
-            width: 300px;
+            width: 100px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -124,15 +124,13 @@
             margin-top: 20px;
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 650px) {
             .tank {
-                width: 100px;
-                font-size: 12px;
+                width: 70px;
             }
 
             .total-box {
-                width: 90%;
-                font-size: 16px;
+                width: 100px;
             }
         }
     </style>
@@ -270,7 +268,7 @@ function limitDecimals(el, count) {
                 tanks.outerLH + tanks.innerLH + tanks.center +
                 tanks.innerRH + tanks.outerRH + tanks.trim
             );
-            document.getElementById('totalFuelBox').textContent = `Fuel on Board (FOB): ${totalFuel} kg`;
+            document.getElementById('totalFuelBox').textContent = `Total FOB: ${totalFuel} kg`;
         }
 
         function toggleMode() {
@@ -282,7 +280,10 @@ function limitDecimals(el, count) {
     </script>
 <table border=0 align=center cellpadding=0 cellspacing=0 id="aircraft-container" style="position: relative; width: 100%; max-width: 650px; margin: auto; background: url('A330N.png') no-repeat center center; background-size: contain; height: 600px;">
 <tr>
-<td align=right colspan=2 style="vertical-align: top;">
+<td align=left style="vertical-align: top;">
+<div id="totalFuelBox" class="total-box">Total FOB: 0 kg</div>
+</td>
+<td align=right style="vertical-align: top;">
 <div class="mode-toggle">
 <button id="modeToggle" onclick="toggleMode()" type=button style="font-size: 28px">🌞 Mode</button>
 </div>
@@ -306,7 +307,7 @@ function limitDecimals(el, count) {
 </td>
 </tr>
 <tr>
-<td align=center colspan=2 height=150px style="vertical-align: bottom;">
+<td align=center colspan=2 style="vertical-align: middle;">
 <div class="tank" style=""><h4>Trim</h4><p id="trim">0 kg</p></div>
 </td>
 </tr>
