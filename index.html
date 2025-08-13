@@ -17,26 +17,32 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <style>
         :root {
-            --bg-color: #121212;
+            --bg-color: #2A3B5F;
             --text-color: #f0f0f0;
             --box-bg: #5e5e5e;
             --highlight: #00cc77;
         }
 
         body.day-mode {
-            --bg-color: #ffffff;
+            --bg-color: #eaf0f6;
             --text-color: #000000;
             --box-bg: #f0f8ff;
             --highlight: #00cc77;
+            background-image:
+                repeating-linear-gradient(to right, rgba(0, 0, 0, 0.05) 0px, rgba(0, 0, 0, 0.05) 1px, transparent 1px, transparent 0.7em),
+                repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0px, rgba(0, 0, 0, 0.05) 1px, transparent 1px, transparent 0.7em);
         }
 
         body {
             font-family: Arial, sans-serif;
             background-color: var(--bg-color);
+            background-image:
+                repeating-linear-gradient(to right, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 0.7em),
+                repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 0.7em);
             color: var(--text-color);
             margin: 0;
             padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-image 0.3s, color 0.3s;
         }
 
         h2, h3 {
@@ -315,9 +321,9 @@ function limitDecimals(el, count) {
 
 <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js')
-      .then(() => console.log('Service Worker registered'))
-      .catch(error => console.error('Service Worker registration failed:', error));
+    navigator.serviceWorker.register('/sw2.js')
+      .then(reg => console.log('Service Worker registered:', reg))
+      .catch(err => console.error('Service Worker registration failed:', err));
   }
 </script>
 
